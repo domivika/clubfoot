@@ -1,7 +1,5 @@
 ### 4 bam files in: III20_proc; III21_proc; IV33_proc; V14_proc
 
-docker run -it -v /home/dominika_kresa/mounted_from_Second/nie_pacz:/work/my_data -v /home/dominika_kresa/reference/:/work/reference -v /home/dominika_kresa/mounted_from_Second/clubfoot_DK:/work smoove_ao
-
 # III20
 smoove call -x --name III20_lumpy --fasta /work/reference/hg38/Homo_sapiens_assembly38.fasta -p 8 \
 --genotype /work/my_data/III20_proc/III20.sorted.deduplicated.recalibrated.bam \
