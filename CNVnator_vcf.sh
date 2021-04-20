@@ -1,7 +1,7 @@
 ### 4 bam files in: III20_proc; III21_proc; IV33_proc; V14_proc
 
 ## Docker
-docker run -it -v /home/dominika_kresa/mounted_from_Second/nie_pacz:/work/my_data -v /home/dominika_kresa/reference/:/work/reference cnvnator
+docker run -it -v /home/dominika_kresa/mounted_from_Second/nie_pacz:/work/my_data -v /home/dominika_kresa/reference/:/work/reference -v /home/dominika_kresa/mounted_from_Second/clubfoot_DK:/work cnvnator
 
 ## BAM -> VCF
 # Extract read mapping 
@@ -48,10 +48,9 @@ docker cp 0d580b090b61:/work/III21_cnvnator.vcf /home/dominika_kresa/mounted_fro
 docker cp 0d580b090b61:/work/IV33_cnvnator.vcf /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator
 docker cp 0d580b090b61:/work/V14_cnvnator.vcf /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator
 
-
 #PASS VCF
 awk 'BEGIN{FS="\t"} $0 ~ /^#/ || $7 == "PASS"{print}' /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator/III20_cnvnator.vcf > /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator/III20_cnvnator_PASS.vcf
 awk 'BEGIN{FS="\t"} $0 ~ /^#/ || $7 == "PASS"{print}' /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator/III21_cnvnator.vcf > /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator/III21_cnvnator_PASS.vcf
-awk 'BEGIN{FS="\t"} $0 ~ /^#/ || $7 == "PASS"{print}' /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator/IV33_cnvnator.vcf > /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator/IV33_cnvnator_PASS.vcf
-awk 'BEGIN{FS="\t"} $0 ~ /^#/ || $7 == "PASS"{print}' /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator/V14_cnvnator.vcf > /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator/V14_cnvnator_PASS.vcf
+#awk 'BEGIN{FS="\t"} $0 ~ /^#/ || $7 == "PASS"{print}' /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator/IV33_cnvnator.vcf > /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator/IV33_cnvnator_PASS.vcf
+#awk 'BEGIN{FS="\t"} $0 ~ /^#/ || $7 == "PASS"{print}' /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator/V14_cnvnator.vcf > /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator/V14_cnvnator_PASS.vcf
 
