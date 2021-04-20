@@ -1,5 +1,3 @@
-### 4 bam files in: III20_proc; III21_proc; IV33_proc; V14_proc
-
 # Extract read mapping 
 cnvnator -root cnv_III20.root -tree /work/my_data/III20_proc/III20.sorted.deduplicated.recalibrated.bam -chrom $(seq 1 22) X Y
 cnvnator -root cnv_III21.root -tree /work/my_data/III21_proc/III21.sorted.deduplicated.recalibrated.bam -chrom $(seq 1 22) X Y
