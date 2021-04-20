@@ -1,5 +1,3 @@
-### 4 bam files in: III20_proc; III21_proc; IV33_proc; V14_proc
-
 # III20
 smoove call -x --name III20_lumpy --fasta /work/reference/hg38/Homo_sapiens_assembly38.fasta -p 8 \
 --genotype /work/my_data/III20_proc/III20.sorted.deduplicated.recalibrated.bam \
