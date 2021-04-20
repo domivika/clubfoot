@@ -19,20 +19,8 @@ smoove call -x --name V14_lumpy --fasta /work/reference/hg38/Homo_sapiens_assemb
 --genotype /work/my_data/V14_proc/V14.sorted.deduplicated.recalibrated.bam \
 --o /work/lumpy
 
-
-#docker -> server
-docker cp smoove_ao:/work/lumpy/GC086423_lumpy-smoove.genotyped.vcf.gz /home/dominika_kresa/mounted_from_Second/lumpy
-
-#unzip file: GC086423_lumpy-smoove.genotyped.vcf.gz -> GC086423_lumpy-smoove.genotyped.vcf
-gunzip /home/dominika_kresa/mounted_from_Second/lumpy/GC086423_lumpy-smoove.genotyped.vcf.gz
-
-#vcf -> bed
-awk '
-BEGIN{FS="\t"; OFS="\t";
-print "contig\tstart\tend\tstrand\ttype"} $0~/^#/ {next};\
-{split($8,a,";"); split (a[1],b,"="); split (a[2],c,"=")}
-{match($8,/END\=([0-9]*);/, E); match($8,/SVTYPE\=([A-Z]{3});/, SVT)}
-{print $1"\t"$2"\t"E[1]"\t"".""\t"SVT[1]}' /home/dominika_kresa/mounted_from_Second/lumpy/GC086423_lumpy-smoove.genotyped.vcf > /home/dominika_kresa/mounted_from_Second/lumpy/GC086423_lumpy-smoove.genotyped.bed
-
-#remove lines with empty fields
-awk  '$3!="."' /home/dominika_kresa/mounted_from_Second/lumpy/GC086423_lumpy-smoove.genotyped.bed > /home/dominika_kresa/mounted_from_Second/GC086423_lumpy.bed
+#unzip files
+gunzip /home/dominika_kresa/mounted_from_Second/lumpy/III20_lumpy-smoove.genotyped.vcf.gz
+gunzip /home/dominika_kresa/mounted_from_Second/lumpy/III21_lumpy-smoove.genotyped.vcf.gz
+gunzip /home/dominika_kresa/mounted_from_Second/lumpy/IV33_lumpy-smoove.genotyped.vcf.gz
+gunzip /home/dominika_kresa/mounted_from_Second/lumpy/V14_lumpy-smoove.genotyped.vcf.gz
