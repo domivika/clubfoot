@@ -45,6 +45,5 @@ cnvnator2VCF.pl -prefix V14_cnvnator -reference hg38 /work/V14_cnvnator.out /wor
 #PASS VCF
 awk 'BEGIN{FS="\t"} $0 ~ /^#/ || $7 == "PASS"{print}' /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator/III20_cnvnator.vcf > /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator/III20_cnvnator_PASS.vcf
 awk 'BEGIN{FS="\t"} $0 ~ /^#/ || $7 == "PASS"{print}' /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator/III21_cnvnator.vcf > /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator/III21_cnvnator_PASS.vcf
-#awk 'BEGIN{FS="\t"} $0 ~ /^#/ || $7 == "PASS"{print}' /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator/IV33_cnvnator.vcf > /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator/IV33_cnvnator_PASS.vcf
-#awk 'BEGIN{FS="\t"} $0 ~ /^#/ || $7 == "PASS"{print}' /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator/V14_cnvnator.vcf > /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator/V14_cnvnator_PASS.vcf
-
+awk 'BEGIN{FS="\t"} $0 ~ /^#/ || $7 == "PASS"{print}' /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator/IV33_cnvnator.vcf > /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator/IV33_cnvnator_PASS.vcf
+awk 'BEGIN{FS="\t"} $0 ~ /^#/ || $7 == "PASS"{print}' /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator/V14_cnvnator.vcf > /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator/V14_cnvnator_PASS.vcf
