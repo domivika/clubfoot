@@ -42,12 +42,6 @@ cnvnator2VCF.pl -prefix IV33_cnvnator -reference hg38 /work/IV33_cnvnator.out /w
 cnvnator2VCF.pl -prefix V14_cnvnator -reference hg38 /work/V14_cnvnator.out /work/reference/hg38 > /work/V14_cnvnator.vcf
 
 
-#docker -> server
-docker cp 0d580b090b61:/work/III20_cnvnator.vcf /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator
-docker cp 0d580b090b61:/work/III21_cnvnator.vcf /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator
-docker cp 0d580b090b61:/work/IV33_cnvnator.vcf /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator
-docker cp 0d580b090b61:/work/V14_cnvnator.vcf /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator
-
 #PASS VCF
 awk 'BEGIN{FS="\t"} $0 ~ /^#/ || $7 == "PASS"{print}' /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator/III20_cnvnator.vcf > /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator/III20_cnvnator_PASS.vcf
 awk 'BEGIN{FS="\t"} $0 ~ /^#/ || $7 == "PASS"{print}' /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator/III21_cnvnator.vcf > /home/dominika_kresa/mounted_from_Second/clubfoot_DK/cnvnator/III21_cnvnator_PASS.vcf
