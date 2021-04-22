@@ -12,13 +12,3 @@ python /work/manta/III20/runWorkflow.py -m local
 python /work/manta/III21/runWorkflow.py -m local
 python /work/manta/IV33/runWorkflow.py -m local
 python /work/manta/V14/runWorkflow.py -m local
-
-
-#change directory name
-mv ~/mounted_from_Second/GC086423_manta ~/mounted_from_Second/manta
-
-#unzip file: diploidSV.vcf.gz -> diploidSV.vcf
-gunzip /home/dominika_kresa/mounted_from_Second/manta/results/variants/diploidSV.vcf.gz
-
-#PASS VCF
-awk 'BEGIN{FS="\t"} $0 ~ /^#/ || $7 == "PASS"{print}' /home/dominika_kresa/mounted_from_Second/manta/results/variants/diploidSV.vcf > /home/dominika_kresa/mounted_from_Second/manta/results/variants/diploidSV_PASS.vcf
