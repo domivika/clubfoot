@@ -37,21 +37,21 @@
 ######################### test #########################
 ## III20_sample
 # Extract read mapping 
-cnvnator -root cnv_III20.root -tree /work/my_data/III20_proc/III20.sorted.deduplicated.recalibrated.bam -chrom $(seq 1 22) X Y
+cnvnator -root cnv.root -tree /work/my_data/nie_pacz/III20_proc/III20.sorted.deduplicated.recalibrated.bam -chrom $(seq 1 22) X Y
 # Generate histogram
-cnvnator -root cnv_III20.root -his 1000 -d /work/reference/hg38
+cnvnator -root cnv.root -his 1000 -d /work/reference/hg38
 # Calculate statistics
-cnvnator -root cnv_III20.root -stat 1000
+cnvnator -root cnv.root -stat 1000
 # Partition
-cnvnator -root cnv_III20.root -partition 1000
+cnvnator -root cnv.root -partition 1000
 # Call CNVs
-cnvnator -root cnv_III20.root -call 1000 > /work/III20_cnvnator.out
+cnvnator -root /work/cnv.root -call 1000 > /work/III20_cnvnator.out
 #Exporting CNV calls as VCFs
 cnvnator2VCF.pl -prefix III20_cnvnator -reference GRCh38 /work/III20_cnvnator.out /work/reference/hg38 > /work/III20_cnvnator.vcf
 
 ## III21_sample
 # Extract read mapping 
-cnvnator -root cnv_III21.root -tree /work/my_data/III21_proc/III21.sorted.deduplicated.recalibrated.bam -chrom $(seq 1 22) X Y
+cnvnator -root cnv.root -tree /work/my_data/III21_proc/III21.sorted.deduplicated.recalibrated.bam -chrom $(seq 1 22) X Y
 # Generate histogram
 cnvnator -root cnv_III21.root -his 1000 -d /work/reference/hg38
 # Calculate statistics
