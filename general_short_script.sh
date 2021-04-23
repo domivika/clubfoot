@@ -2,7 +2,7 @@
 
 ### CNVnator
 # Docker
-docker run -it -v /home/dominika_kresa/mounted_from_Second/nie_pacz:/work/my_data -v /home/dominika_kresa/reference/:/work/reference -v /home/dominika_kresa/mounted_from_Second/clubfoot_DK:/work cnvnator
+docker run -it -v /home/dominika_kresa/mounted_from_Second/:/work/my_data -v /home/dominika_kresa/reference/:/work/reference cnvnator
 bash cnvnator_script.sh
 
 ### Lumpy
