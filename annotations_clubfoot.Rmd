@@ -1,0 +1,145 @@
+---
+title: "annotations_SV"
+author: "Dominika Kresa"
+date: "25 04 2021"
+output: html_document
+---
+
+```{r}
+suppressMessages(library(dplyr))
+suppressMessages(library(tidyr))
+suppressMessages(library("writexl"))
+annotations_SV <-
+  read.delim(file = "/home/dominika_kresa/old_clubfoot.merged.annotated.bed",
+             sep = "\t",
+             stringsAsFactors = F)
+```
+
+```{r}
+annotations_SV_GT_3 <- annotations_SV %>% select(
+  seqnames,
+  start,
+  end,
+  change_type,
+  QUAL_lumpy,
+  III20_consensus_GT,
+  III21_consensus_GT,
+  IV33_consensus_GT,
+  V14_consensus_GT,
+  lumpy_site_info,
+  ncbiRefSeqCurated,
+  geneHancerGenesTssDoubleElite,
+  Num_exons,
+  DGV,
+  seqnames.1,
+  GNOMAD,
+  link,
+  score,
+  score_gene,
+  OMIM_green,
+  OMIM_yellow
+) %>% filter(
+  !change_type == "BND",
+  score > 0,
+  III21_consensus_GT == "0/0",
+  !III20_consensus_GT == "0/0",
+  !IV33_consensus_GT == "0/0",
+  !V14_consensus_GT == "0/0"
+) %>% arrange(desc(score))
+View(annotations_SV_GT_3)
+```
+
+```{r}
+annotations_SV_GT_2 <- annotations_SV %>% select(
+  seqnames,
+  start,
+  end,
+  change_type,
+  QUAL_lumpy,
+  III20_consensus_GT,
+  III21_consensus_GT,
+  IV33_consensus_GT,
+  V14_consensus_GT,
+  lumpy_site_info,
+  ncbiRefSeqCurated,
+  geneHancerGenesTssDoubleElite,
+  Num_exons,
+  DGV,
+  seqnames.1,
+  GNOMAD,
+  link,
+  score,
+  score_gene,
+  OMIM_green,
+  OMIM_yellow
+) %>% filter(
+  !change_type == "BND",
+  score > 0,
+  III21_consensus_GT == "0/0",
+  III20_consensus_GT == "0/0" &
+    !IV33_consensus_GT == "0/0" &
+    !V14_consensus_GT == "0/0" |
+    !III20_consensus_GT == "0/0" &
+    IV33_consensus_GT == "0/0" &
+    !V14_consensus_GT == "0/0" |
+    !III20_consensus_GT == "0/0" &
+    !IV33_consensus_GT == "0/0" & V14_consensus_GT == "0/0"
+) %>% arrange(desc(score))
+View(annotations_SV_GT_2)
+```
+
+```{r}
+annotations_SV_GT_1 <- annotations_SV %>% select(
+  seqnames,
+  start,
+  end,
+  change_type,
+  QUAL_lumpy,
+  III20_consensus_GT,
+  III21_consensus_GT,
+  IV33_consensus_GT,
+  V14_consensus_GT,
+  lumpy_site_info,
+  ncbiRefSeqCurated,
+  geneHancerGenesTssDoubleElite,
+  Num_exons,
+  DGV,
+  seqnames.1,
+  GNOMAD,
+  link,
+  score,
+  score_gene,
+  OMIM_green,
+  OMIM_yellow
+) %>% filter(
+  !change_type == "BND",
+  score > 0,
+  III21_consensus_GT == "0/0",
+  III20_consensus_GT == "0/0" &
+    IV33_consensus_GT == "0/0" &
+    !V14_consensus_GT == "0/0" |
+    !III20_consensus_GT == "0/0" &
+    IV33_consensus_GT == "0/0" &
+    V14_consensus_GT == "0/0" |
+    III20_consensus_GT == "0/0" &
+    !IV33_consensus_GT == "0/0" & V14_consensus_GT == "0/0"
+) %>% arrange(desc(score))
+View(annotations_SV_GT_1)
+```
+
+```{r}
+annotations_SV_m1 <-
+  rbind(annotations_SV_GT_3,
+        annotations_SV_GT_2,
+        annotations_SV_GT_1)
+annotations_SV_m2 <-
+  annotations_SV_m1 %>% unite("POS", seqnames:start, sep = ":", remove = TRUE)
+annotations_SV_merged <-
+  annotations_SV_m2 %>% unite("chr:start-end", POS:end, sep = "-", remove = TRUE)
+View(annotations_SV_merged)
+```
+
+```{r}
+write_xlsx(annotations_SV_merged,
+           "/home/dominika_kresa//annotations_SV_merged.xlsx")
+```
