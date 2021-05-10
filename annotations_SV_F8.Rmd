@@ -1,0 +1,157 @@
+---
+title: "annotations_SV_F8"
+author: "Dominika Kresa"
+date: "4/27/2021"
+output: html_document
+---
+
+```{r}
+suppressMessages(library(dplyr))
+suppressMessages(library(tidyr))
+suppressMessages(library("writexl"))
+annotations_SV <-
+  read.delim(file = "/home/dominika_kresa/clubfoot_merged_F8_annotated.final.bed",
+             sep = "\t",
+             stringsAsFactors = F)
+View(annotations_SV)
+```
+
+```{r}
+annotations_SV_GT_3 <- annotations_SV %>% select(
+  seqnames,
+  start,
+  end,
+  change_type,
+  QUAL_lumpy,
+  GC092551_consensus_GT,
+  GC092550_consensus_GT,
+  GC092552_consensus_GT,
+  GC092553_consensus_GT,
+  lumpy_site_info,
+  ncbiRefSeqCurated,
+  geneHancerGenesTssDoubleElite,
+  Num_exons,
+  DGV,
+  GNOMAD,
+  link,
+  score,
+  score_gene,
+  OMIM_green,
+  OMIM_yellow
+) %>% filter(
+  !change_type == "BND" & !change_type == "INS",
+  score > 0.01,
+  GC092551_consensus_GT == "0/0",
+  !GC092550_consensus_GT == "0/0",
+  !GC092552_consensus_GT == "0/0",
+  !GC092553_consensus_GT == "0/0"
+) %>% arrange(desc(score))
+View(annotations_SV_GT_3)
+```
+
+```{r}
+annotations_SV_m1 <- annotations_SV_GT_3 %>% mutate(
+  start_1 = annotations_SV_GT_3[, "start"] - 1000,
+  start_2 = annotations_SV_GT_3[, "start"] + 1000,
+  end_1 = annotations_SV_GT_3[, "end"] - 1000,
+  end_2 = annotations_SV_GT_3[, "end"] + 1000
+) %>% unite("start_end", start:end, sep = "-", remove = FALSE)
+
+annotations_SV_m2 <-
+  annotations_SV_m1 %>% unite("chr:start-end",
+                              seqnames:start_end,
+                              sep = ":",
+                              remove = F)
+
+annotations_SV_m3 <-
+  annotations_SV_m2 %>% unite("start_n",
+                              start_1:start_2,
+                              sep = "-",
+                              remove = T) %>% unite("end_n",
+                                                    end_1:end_2,
+                                                    sep = "-",
+                                                    remove = T)
+
+annotations_SV_m4 <-
+  annotations_SV_m3 %>% unite(
+    "chr:[1000+start]-[1000-start]",
+    seqnames | start_n,
+    sep = ":",
+    remove = F
+  ) %>% unite("chr:[1000+end]-[1000-end]",
+              seqnames | end_n,
+              sep = ":",
+              remove = F)
+View(annotations_SV_m4)
+```
+
+```{r}
+annotations_SV_merge <- annotations_SV_m4 %>% select(
+  "chr:start-end",
+  "chr:[1000+start]-[1000-start]",
+  "chr:[1000+end]-[1000-end]",
+  seqnames,
+  start,
+  end,
+  change_type,
+  QUAL_lumpy,
+  GC092551_consensus_GT,
+  GC092550_consensus_GT,
+  GC092552_consensus_GT,
+  GC092553_consensus_GT,
+  lumpy_site_info,
+  ncbiRefSeqCurated,
+  geneHancerGenesTssDoubleElite,
+  Num_exons,
+  DGV,
+  GNOMAD,
+  link,
+  score,
+  score_gene,
+  OMIM_green,
+  OMIM_yellow
+)
+View(annotations_SV_merge)
+```
+
+```{r}
+write_xlsx(
+  annotations_SV_merge,
+  "/home/dominika_kresa/mounted_from_Second/nie_pacz//annotations_SV_F8.xlsx"
+)
+annotations_SV_bed <-
+  annotations_SV_merge %>% select(seqnames, start, end, change_type)
+write.table(
+  annotations_SV_bed,
+  row.names = F,
+  col.names = F,
+  sep = "\t",
+  quote = F,
+  "/home/dominika_kresa/mounted_from_Second/nie_pacz//annotations_SV_F8.bed"
+)
+
+annotations_SV_inv_gff <-
+  annotations_SV_merge %>% select(seqnames, start, end, score) %>% mutate(score = score * 100) %>% select(type = INV)
+source <- "."
+feature <- "."
+strand <- "."
+frame <- "."
+attribute <- "."
+annotations_SV_gff$source <- source
+annotations_SV_gff$feature <- feature
+annotations_SV_gff$strand <- strand
+annotations_SV_gff$frame <- frame
+annotations_SV_gff$attribute <- attribute
+annotations_SV_gff <- annotations_SV_gff[c(1,5,6,2,3,4,7,8,9)]
+
+annotations_SV_gff %>% mutate(feature = )
+View(annotations_SV_gff)
+write.table(
+  annotations_SV_gff,
+  row.names = F,
+  col.names = F,
+  sep = "\t",
+  quote = F,
+  "/home/dominika_kresa/mounted_from_Second/nie_pacz//annotations_SV_F8.gff"
+)
+```
