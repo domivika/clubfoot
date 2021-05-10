@@ -1,0 +1,639 @@
+---
+title: "final final final 123"
+author: "Adrian"
+date: "4/16/2021"
+output: html_document
+---
+
+```{r}
+suppressMessages(library(caret))
+suppressMessages(library(dplyr))
+suppressMessages(library(GenomicRanges))
+suppressMessages(library(ggpubr))
+```
+
+# data import
+```{r}
+path_to_data <- "/home/dominika_kresa/mounted_from_Second/"
+path_to_data_ref <- "/home/dominika_kresa/data/ashkenazim_trio/"
+cnvnator_GC086423 <-
+  read.table(
+    paste0(path_to_data, "GC086423_cnvnator.bed"),
+    header = TRUE,
+    stringsAsFactors = F
+  )
+manta_GC086423 <-
+  read.table(
+    paste0(path_to_data, "GC086423_manta.bed"),
+    header = TRUE,
+    stringsAsFactors = F
+  )
+lumpy_GC086423 <-
+  read.table(
+    paste0(path_to_data, "GC086423_lumpy.bed"),
+    header = TRUE,
+    stringsAsFactors = F
+  )
+reference_GC086423 <-
+  read.table(
+    paste0(path_to_data_ref, "HG002_SVs_Tier1_v0.6_correct_PASS.bed"),
+    header = TRUE,
+    stringsAsFactors = F
+  )
+cnvnator_GC086423_filter <-
+  read.table(
+    paste0(path_to_data, "GC086423_cnvnator_all_filters.bed"),
+    header = TRUE,
+    stringsAsFactors = F
+  )
+manta_GC086423_filter <-
+  read.table(
+    paste0(path_to_data, "GC086423_manta_filtered_SU.bed"),
+    header = TRUE,
+    stringsAsFactors = F
+  )
+lumpy_GC086423_filter <-
+  read.table(
+    paste0(path_to_data, "GC086423_lumpy_filtered_SU.bed"),
+    header = TRUE,
+    stringsAsFactors = F
+  )
+reference_GC086423 <-
+  reference_GC086423 %>% mutate(type = ifelse(
+    SVTYPE == "DEL",
+    as.character(SVTYPE),
+    ifelse(SVTYPE == "INS" &
+             REPTYPE == "DUP", as.character(REPTYPE), "OTHER")
+  )) %>%
+  filter(type != "OTHER") %>%
+  select(contig, start, end, strand, type)
+is.data.frame(cnvnator_GC086423)
+is.data.frame(manta_GC086423)
+is.data.frame(lumpy_GC086423)
+is.data.frame(cnvnator_GC086423_filter)
+is.data.frame(manta_GC086423_filter)
+is.data.frame(lumpy_GC086423_filter)
+is.data.frame(reference_GC086423)
+cnvnator_GC086423[!complete.cases(cnvnator_GC086423),]
+manta_GC086423[!complete.cases(manta_GC086423),]
+lumpy_GC086423[!complete.cases(lumpy_GC086423),]
+reference_GC086423[!complete.cases(reference_GC086423),]
+cnvnator_GC086423_filter[!complete.cases(cnvnator_GC086423_filter),]
+manta_GC086423_filter[!complete.cases(manta_GC086423_filter),]
+lumpy_GC086423_filter[!complete.cases(lumpy_GC086423_filter),]
+colnames(cnvnator_GC086423) <-
+  colnames(manta_GC086423) <-
+  colnames(lumpy_GC086423) <-
+  colnames(cnvnator_GC086423_filter) <-
+  colnames(manta_GC086423_filter) <-
+  colnames(lumpy_GC086423_filter) <- colnames(reference_GC086423) <-
+  c("seqnames", "start", "end", "strand", "type")
+gr_cnvnator_GC086423 <- makeGRangesFromDataFrame(
+  cnvnator_GC086423,
+  keep.extra.columns = TRUE,
+  ignore.strand = FALSE,
+  seqinfo = NULL,
+  seqnames.field = c(
+    "seqnames",
+    "seqname",
+    "chromosome",
+    "chrom",
+    "chr",
+    "chromosome_name",
+    "seqid"
+  ),
+  start.field = "start",
+  end.field = c("end", "stop"),
+  strand.field = "strand",
+  starts.in.df.are.0based = FALSE
+)
+
+gr_manta_GC086423 <- makeGRangesFromDataFrame(
+  manta_GC086423,
+  keep.extra.columns = TRUE,
+  ignore.strand = FALSE,
+  seqinfo = NULL,
+  seqnames.field = c(
+    "seqnames",
+    "seqname",
+    "chromosome",
+    "chrom",
+    "chr",
+    "chromosome_name",
+    "seqid"
+  ),
+  start.field = "start",
+  end.field = c("end", "stop"),
+  strand.field = "strand",
+  starts.in.df.are.0based =
+    FALSE
+)
+
+gr_lumpy_GC086423 <- makeGRangesFromDataFrame(
+  lumpy_GC086423,
+  keep.extra.columns = TRUE,
+  ignore.strand = FALSE,
+  seqinfo = NULL,
+  seqnames.field = c(
+    "seqnames",
+    "seqname",
+    "chromosome",
+    "chrom",
+    "chr",
+    "chromosome_name",
+    "seqid"
+  ),
+  start.field = "start",
+  end.field = c("end", "stop"),
+  strand.field = "strand",
+  starts.in.df.are.0based =
+    FALSE
+)
+
+gr_reference_GC086423 <-
+  makeGRangesFromDataFrame(
+    reference_GC086423,
+    keep.extra.columns = TRUE,
+    ignore.strand = FALSE,
+    seqinfo = NULL,
+    seqnames.field = c(
+      "seqnames",
+      "seqname",
+      "chromosome",
+      "chrom",
+      "chr",
+      "chromosome_name",
+      "seqid"
+    ),
+    start.field = "start",
+    end.field = c("end", "stop"),
+    strand.field = "strand",
+    starts.in.df.are.0based =
+      FALSE
+  )
+
+gr_cnvnator_GC086423_filter <- makeGRangesFromDataFrame(
+  cnvnator_GC086423_filter,
+  keep.extra.columns = TRUE,
+  ignore.strand = FALSE,
+  seqinfo = NULL,
+  seqnames.field = c(
+    "seqnames",
+    "seqname",
+    "chromosome",
+    "chrom",
+    "chr",
+    "chromosome_name",
+    "seqid"
+  ),
+  start.field = "start",
+  end.field = c("end", "stop"),
+  strand.field = "strand",
+  starts.in.df.are.0based = FALSE
+)
+
+gr_manta_GC086423_filter <- makeGRangesFromDataFrame(
+  manta_GC086423_filter,
+  keep.extra.columns = TRUE,
+  ignore.strand = FALSE,
+  seqinfo = NULL,
+  seqnames.field = c(
+    "seqnames",
+    "seqname",
+    "chromosome",
+    "chrom",
+    "chr",
+    "chromosome_name",
+    "seqid"
+  ),
+  start.field = "start",
+  end.field = c("end", "stop"),
+  strand.field = "strand",
+  starts.in.df.are.0based =
+    FALSE
+)
+
+gr_lumpy_GC086423_filter <- makeGRangesFromDataFrame(
+  lumpy_GC086423_filter,
+  keep.extra.columns = TRUE,
+  ignore.strand = FALSE,
+  seqinfo = NULL,
+  seqnames.field = c(
+    "seqnames",
+    "seqname",
+    "chromosome",
+    "chrom",
+    "chr",
+    "chromosome_name",
+    "seqid"
+  ),
+  start.field = "start",
+  end.field = c("end", "stop"),
+  strand.field = "strand",
+  starts.in.df.are.0based =
+    FALSE
+)
+gr_cnvnator_GC086423$type <- as(gr_cnvnator_GC086423$type, "Rle")
+gr_manta_GC086423$type <- as(gr_manta_GC086423$type, "Rle")
+gr_lumpy_GC086423$type <- as(gr_lumpy_GC086423$type, "Rle")
+gr_reference_GC086423$type <- as(gr_reference_GC086423$type, "Rle")
+gr_cnvnator_GC086423_filter$type <-
+  as(gr_cnvnator_GC086423_filter$type, "Rle")
+gr_manta_GC086423_filter$type <-
+  as(gr_manta_GC086423_filter$type, "Rle")
+gr_lumpy_GC086423_filter$type <-
+  as(gr_lumpy_GC086423_filter$type, "Rle")
+names(gr_cnvnator_GC086423) <- NULL
+names(gr_manta_GC086423) <- NULL
+names(gr_lumpy_GC086423) <- NULL
+names(gr_reference_GC086423) <- NULL
+names(gr_cnvnator_GC086423_filter) <- NULL
+names(gr_manta_GC086423_filter) <- NULL
+names(gr_lumpy_GC086423_filter) <- NULL
+seqlevels(gr_cnvnator_GC086423, pruning.mode = "coarse") <-
+  paste0("chr", c(1:22, "X", "Y"))
+seqlevels(gr_manta_GC086423, pruning.mode = "coarse") <-
+  paste0("chr", c(1:22, "X", "Y"))
+seqlevels(gr_lumpy_GC086423, pruning.mode = "coarse") <-
+  paste0("chr", c(1:22, "X", "Y"))
+seqlevels(gr_reference_GC086423, pruning.mode = "coarse") <-
+  paste0("chr", c(1:22, "X", "Y"))
+seqlevels(gr_cnvnator_GC086423_filter, pruning.mode = "coarse") <-
+  paste0("chr", c(1:22, "X", "Y"))
+seqlevels(gr_manta_GC086423_filter, pruning.mode = "coarse") <-
+  paste0("chr", c(1:22, "X", "Y"))
+seqlevels(gr_lumpy_GC086423_filter, pruning.mode = "coarse") <-
+  paste0("chr", c(1:22, "X", "Y"))
+gr_lumpy_GC086423_SV <-
+  gr_lumpy_GC086423[width(gr_lumpy_GC086423) >= 50]
+gr_manta_GC086423_SV <-
+  gr_manta_GC086423[width(gr_manta_GC086423) >= 50]
+gr_cnvnator_GC086423_SV <-
+  gr_cnvnator_GC086423[width(gr_cnvnator_GC086423) >= 50]
+gr_reference_GC086423_SV <-
+  gr_reference_GC086423[width(gr_reference_GC086423) >= 50]
+joined_all_SV <-
+  sort(c(gr_cnvnator_GC086423, gr_manta_GC086423, gr_lumpy_GC086423))
+joined_all_SV <- joined_all_SV[width(joined_all_SV) >= 50]
+
+gr_lumpy_GC086423_filter_SV <-
+  gr_lumpy_GC086423_filter[width(gr_lumpy_GC086423_filter) >= 50]
+gr_manta_GC086423_filter_SV <-
+  gr_manta_GC086423_filter[width(gr_manta_GC086423_filter) >= 50]
+gr_cnvnator_GC086423_filter_SV <-
+  gr_cnvnator_GC086423_filter[width(gr_cnvnator_GC086423_filter) >= 50]
+gr_reference_GC086423_SV <-
+  gr_reference_GC086423_SV[gr_reference_GC086423_SV$type == "DEL" |
+                             gr_reference_GC086423_SV$type == "DUP"]
+gr_cnvnator_GC086423_SV <-
+  gr_cnvnator_GC086423_SV[gr_cnvnator_GC086423_SV$type == "DEL" |
+                            gr_cnvnator_GC086423_SV$type == "DUP"]
+gr_lumpy_GC086423_SV <-
+  gr_lumpy_GC086423_SV[gr_lumpy_GC086423_SV$type == "DEL" |
+                         gr_lumpy_GC086423_SV$type == "DUP"]
+gr_manta_GC086423_SV <-
+  gr_manta_GC086423_SV[gr_manta_GC086423_SV$type == "DEL" |
+                         gr_manta_GC086423_SV$type == "DUP"]
+
+gr_cnvnator_GC086423_filter_SV <-
+  gr_cnvnator_GC086423_filter_SV[gr_cnvnator_GC086423_filter_SV$type == "DEL" |
+                                   gr_cnvnator_GC086423_filter_SV$type == "DUP"]
+gr_lumpy_GC086423_filter_SV <-
+  gr_lumpy_GC086423_filter_SV[gr_lumpy_GC086423_filter_SV$type == "DEL" |
+                                gr_lumpy_GC086423_filter_SV$type == "DUP"]
+gr_manta_GC086423_filter_SV <-
+  gr_manta_GC086423_filter_SV[gr_manta_GC086423_filter_SV$type == "DEL" |
+                                gr_manta_GC086423_filter_SV$type == "DUP"]
+```
+
+```{r}
+mergeConnectedRanges <- function(x, hits)
+{
+  stopifnot(is(x, "GenomicRanges"))
+  stopifnot(is(hits, "Hits"))
+  stopifnot(queryLength(hits) == subjectLength(hits))
+  stopifnot(queryLength(hits) == length(x))
+  clusters <- extractClustersFromSelfHits(hits)
+  ans <- range(extractList(x, clusters))
+  if (any(elementNROWS(ans) != 1L))
+    stop(
+      wmsg(
+        "some connected ranges are not on the same ",
+        "chromosome and strand, and thus cannot be ",
+        "merged"
+      )
+    )
+  ans <- unlist(ans)
+  mcols(ans)$revmap <- clusters
+  ans
+}
+
+extractClustersFromSelfHits <- function(hits)
+{
+  stopifnot(is(hits, "Hits"))
+  N <- queryLength(hits)
+  stopifnot(N == subjectLength(hits))
+  h <- GenomicRanges::union(hits, t(hits))
+  qh <- queryHits(h)
+  sh <- subjectHits(h)
+  cid <- cid0 <- seq_len(N)  # cluster ids
+  while (TRUE) {
+    cid2 <- pmin(cid, selectHits(h, "first"))
+    if (identical(cid2, cid))
+      break
+    cid <- cid2
+    h <- Hits(qh, cid[sh], N, N)
+  }
+  unname(splitAsList(cid0, cid))
+}
+
+DetectVariants_df <-
+  function(merged_intervals_hits,
+           gr_TP,
+           overlap = NULL,
+           wiggle = -1,
+           return_intervals = FALSE)  {
+    if(wiggle != -1L){
+      type = c("equal")
+    }
+    else{
+      type = c("any")
+    }
+    hits2 <-
+      GenomicRanges::findOverlaps(merged_intervals_hits,
+                                  gr_TP,
+                                  maxgap = wiggle,
+                                  type = type)
+    same_type <-
+      merged_intervals_hits[queryHits(hits2)]$type == gr_TP[subjectHits(hits2)]$type
+    if (!is.null(overlap)) {
+      overlaps <-
+        GenomicRanges::pintersect(merged_intervals_hits[queryHits(hits2)], gr_TP[subjectHits(hits2)])
+      percentOverlap <-
+        width(overlaps) / width(gr_TP[subjectHits(hits2)])
+      percentOverlap_r <-
+        width(overlaps) / width(merged_intervals_hits[queryHits(hits2)])
+    }
+    
+    if (is.null(overlap)) {
+      hits2 <- hits2[same_type]
+    }
+    else if (overlap == 0) {
+      hits2 <- hits2[same_type]
+    } else{
+      hits2 <- hits2[percentOverlap_r >= overlap &
+                       percentOverlap >= overlap &
+                       same_type]
+    }
+    #intervals <- c(gr_TP, (merged_intervals_hits[-queryHits(hits2)]))
+    intervals <- c(gr_TP, merged_intervals_hits)
+    if (return_intervals) {
+      intervals
+    } else{
+      return(
+        data_frame <-
+          data.frame(
+            studied = intervals %over% merged_intervals_hits,
+            reference = intervals %over% gr_TP,
+            wiggle = wiggle
+          )
+      )
+    }
+  }
+this_is_a_joke <- function(df_1, df_2){
+  types <- unique(c(df_1$type,df_2$type))
+  collect_df_1 <- c()
+  collect_df_2 <- c()
+  for(type in types){
+    collect_df_1 <- c(collect_df_1,GenomicRanges::countOverlaps(df_1[df_1$type == type], df_2[df_2$type == type]))
+    collect_df_2 <- c(collect_df_2,GenomicRanges::countOverlaps(df_2[df_2$type == type], df_1[df_1$type == type]))
+  }
+  return(c(sum(ifelse(collect_df_1 == 1,1,0))/length(collect_df_1),
+          sum(ifelse(collect_df_2 == 1,1,0))/length(collect_df_2)))
+}
+
+mergeIntervalsAndHits <-
+  function(intervals,
+           reciprocal =T,
+           overlap = 0,
+           wiggle = -1L) {
+    if(wiggle == -1L){
+      type = c("any")
+    }
+    else{
+      type = c("equal")
+    }
+    hits <-
+      GenomicRanges::findOverlaps(
+        intervals,
+        drop.self = TRUE,
+        drop.redundant = TRUE,
+        maxgap = wiggle,
+        select = "all",
+        type = type,
+        minoverlap = 1
+      )
+    x <- intervals[queryHits(hits)]
+    y <- intervals[subjectHits(hits)]
+    same_type <- x$type == y$type
+    percentOverlap <-
+      width(pintersect(x, y)) / width(intervals[subjectHits(hits)])
+    percentOverlap_r <-
+      width(pintersect(x, y)) / width(intervals[queryHits(hits)])
+    if (overlap == 0) {
+      hits <- hits[same_type]
+    } else{
+      hits <- hits[percentOverlap_r >= overlap &
+                     percentOverlap >= overlap &
+                     same_type]
+    }
+    if (length(hits) == 0) {
+      output <- intervals
+      output$types <- NULL
+      output$revmap <- NULL
+      sort(output)
+    } else{
+      merged_intervals_hits <- mergeConnectedRanges(intervals, hits)
+      intervals[-unlist(merged_intervals_hits$revmap)]
+      x <- merged_intervals_hits$revmap
+      intervals_type <- as.character(mcols(intervals)$type)
+      merged_intervals_hits$type <-
+        Rle(sapply(x, function(x) {
+          intervals_type[x[1]]
+        }, simplify = TRUE, USE.NAMES = TRUE))
+      output <-
+        (c(merged_intervals_hits, intervals[-unlist(merged_intervals_hits$revmap)]))
+      output$types <- NULL
+      output$revmap <- NULL
+      sort(output)
+    }
+  }
+
+
+report_difference <-
+  function(intervals,
+           reciprocal =T,
+           overlap = 0,
+           wiggle = -1L) {
+    if(wiggle == -1L){
+      type = c("any")
+    }
+    else{
+      type = c("equal")
+    }
+    hits <-
+      GenomicRanges::findOverlaps(
+        intervals,
+        drop.self = TRUE,
+        drop.redundant = TRUE,
+        maxgap = wiggle,
+        select = "all",
+        type = type,
+        minoverlap = 1
+      )
+    x <- intervals[queryHits(hits)]
+    y <- intervals[subjectHits(hits)]
+    same_type <- x$type == y$type
+    percentOverlap <-
+      width(pintersect(x, y)) / width(intervals[subjectHits(hits)])
+    percentOverlap_r <-
+      width(pintersect(x, y)) / width(intervals[queryHits(hits)])
+    if (overlap == 0) {
+      hits <- hits[same_type]
+    } else{
+      hits <- hits[percentOverlap_r >= overlap &
+                     percentOverlap >= overlap &
+                     same_type]
+    }
+    if (length(hits) == 0) {
+      return(NA)
+    } else{
+      mean(c(abs(start(intervals[queryHits(hits)])-start(intervals[subjectHits(hits)])),
+               abs(end(intervals[queryHits(hits)])-end(intervals[subjectHits(hits)]))))
+      
+    }
+  }
+
+```
+
+```{r}
+wiggle_v <- c(1000000,100000,10000, 5000, 1000, 500, 100, 1)
+overlap_v <- seq(0, 1, by = 0.25)
+
+tools_used <- c("manta", "lumpy","cnvnator")
+
+
+matrix_to_expand <-
+  expand.grid(wiggle_v, overlap_v, unlist(lapply(2:3, function(n)
+    combn(tools_used, n, paste, collapse = "_"))), stringsAsFactors = F)
+matrix_to_expand <-
+  matrix_to_expand[!(is.na(matrix_to_expand$Var1) &
+                       is.na(matrix_to_expand$Var2)), ]
+matrix_to_expand <-
+  rbind(matrix_to_expand,
+        c(NA, NA, "cnvnator"),
+        c(NA, NA, "lumpy"),
+        c(NA, NA, "manta"))
+
+kek_2 <- do.call(rbind,apply(matrix_to_expand, 1, function(x) {
+  wiggle <- ifelse(is.na(x[1]), -1, as.integer(x[1]))
+  overlap <- ifelse(is.na(x[2]), 0, as.double(x[2]))
+  if (x[3] %in% tools_used) {
+    combined_tools <-
+      get(paste("gr", x[3], "GC086423","filter", "SV", sep = "_"))
+  } else{
+    combined_tools <-
+      do.call(c, lapply(paste(
+        "gr", unlist(strsplit(x[3], "_")), "GC086423", "SV", sep = "_"
+      ), function(y) {
+        get(y)
+      }))
+  }
+  mean_dist <- report_difference(intervals = combined_tools,
+                                   overlap = overlap,
+                                   wiggle = wiggle)
+  merged <-
+    mergeIntervalsAndHits(intervals = combined_tools,
+                          overlap = overlap,
+                          wiggle = wiggle)
+
+  
+  prec_rec <- this_is_a_joke(merged, gr_reference_GC086423_SV)
+  print(paste0("Doing...", paste(x[1], x[2], x[3], sep = "|")))
+  return(
+    data.frame(
+      name = paste(x[1], x[2], x[3], sep = "|"),
+      intervals_covered = round(prec_rec[1], digits = 2),
+      ref_covered = round(prec_rec[2], digits = 2),
+      dist = round(mean_dist, digits = 2),
+      merged_length = length(merged),
+      stringsAsFactors = F
+    )
+  )
+}))
+kek_2
+
+```
+
+
+```{r}
+programs <- gsub(".*\\|(.*)", "\\1", kek_2$name)
+
+as.data.frame(kek_2) %>% ggplot(aes(x = ref_covered,
+                                    y = intervals_covered,
+                                    color = programs)) + geom_point() + geom_segment(
+                                      x = 0.33,
+                                      y = 0.45,
+                                      xend = 0.398,
+                                      yend = 0.565,
+                                      lineend = "round",
+                                      linejoin = "round",
+                                      size = 0.6,
+                                      arrow = arrow(length = unit(0.1, "inches")),
+                                      colour = "red"
+                                    ) +
+  labs(x = "Unique variants relative to reference [%]", y = "Unique variants relative to intervals [%]") +
+  ggtitle("Detected unique variants")
+```
+
+```{r}
+programs <- gsub(".*\\|(.*)", "\\1", kek_2$name)
+
+as.data.frame(kek_2) %>% ggplot(aes(x = ref_covered,
+                                    y = dist,
+                                    color = programs)) + geom_point() + geom_segment(
+                                      x = 0.38,
+                                      y = 3000,
+                                      xend = 0.399,
+                                      yend = 100,
+                                      lineend = "round",
+                                      linejoin = "round",
+                                      size = 0.5,
+                                      arrow = arrow(length = unit(0.1, "inches")),
+                                      colour = "red"
+                                    ) +
+  scale_y_log10() +
+  labs(x = "Unique variants relative to reference [%]", y = "Distance between detected variants [bp]") +
+  ggtitle("Detected unique variants & distance")
+```
+
+```{r}
+new_kek <- kek_2[!(kek_2$dist >= 10000), ]
+programs <- gsub(".*\\|(.*)", "\\1", new_kek$name)
+as.data.frame(new_kek) %>% ggplot(aes(x = ref_covered,
+                                                y = dist,
+                                                color = programs)) + geom_point() + geom_segment(
+                                                  x = 0.38,
+                                                  y = 3000,
+                                                  xend = 0.399,
+                                                  yend = 100,
+                                                  lineend = "round",
+                                                  linejoin = "round",
+                                                  size = 0.5,
+                                                  arrow = arrow(length = unit(0.1, "inches")),
+                                                  colour = "red"
+                                                ) +
+  labs(x = "Unique variants relative to reference [%]", y = "Distance between detected variants [bp]") +
+  ggtitle("Detected unique variants & distance")
+```
+```
